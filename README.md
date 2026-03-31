@@ -15,13 +15,17 @@
 ## 🗂️ 项目文件结构
 
 ```
+## 📁 项目文件结构
+
+```text
 litebook-pm-portfolio/
-├── README.md                    ← 本文件（项目总览）
+├── README.md                  <- 本文件（项目总览）
 ├── docs/
-│   └── LiteBook_PRD_v1.0.docx  ← 完整产品需求文档
+│   ├── LiteBook_PRD_v1.0.docx <- 完整产品需求文档 (Word版备份)
+│   └── LiteBook_PRD_v1.0.md    <- 完整产品需求文档 (Markdown精排版)
 ├── design/
-│   ├── swimlane.html            ← 核心业务流程泳道图（可在浏览器打开）
-│   └── prototype.html           ← 交互式产品原型（可在浏览器打开）
+│   ├── prototype.html         <- 交互式产品原型 (可在浏览器运行)
+│   └── swimlane.html          <- 核心业务流程泳道图 (纯代码绘制)
 ```
 
 ---
