@@ -117,6 +117,7 @@
 在进入具体功能细节前，先梳理“用户注册”与“日常快速记账”两大核心场景的跨端/跨服务交互流转逻辑：
 
 *<img width="2546" height="1741" alt="image" src="https://github.com/user-attachments/assets/d57dd274-5037-43b2-8474-61a4ddaa68e8" />*
+> 💡 **Geek 提示**：此泳道图由本人使用 HTML + SVG 纯代码绘制。您可以点击 [查看 swimlane.html 源码](../design/swimlane.html) 了解底层逻辑。
 
 ### 6.1 极速记账
 * **交互流程**：用户点击首页悬浮「+」按钮 -> 底部弹出记账面板 -> 输入金额 -> AI自动推荐分类 -> 点击保存，动效反馈后面板收起。
