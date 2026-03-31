@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>轻记账 LiteBook — 交互原型 V1.0</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system,'PingFang SC','Helvetica Neue',sans-serif; background:#F0F4F8; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding: 32px 16px 48px; }
+.page-title { font-size: 20px; font-weight: 600; color: #1A202C; margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: #718096; margin-bottom: 8px; }
+.badge { display:inline-block; background:#E1F5EE; color:#0F6E56; font-size:11px; font-weight:500; padding:3px 10px; border-radius:12px; margin-bottom:20px; }
+.screen-tabs { display:flex; gap:8px; margin-bottom:20px; }
+.tab { padding:7px 18px; border-radius:20px; border:1.5px solid #CBD5E0; background:white; color:#4A5568; font-size:13px; cursor:pointer; transition:all .2s; font-family:inherit; }
+.tab.active { background:#1D9E75; border-color:#1D9E75; color:white; }
+.device { width:320px; background:#1A202C; border-radius:48px; padding:8px; box-shadow:0 24px 64px rgba(0,0,0,.25); }
+.device-inner { background:white; border-radius:40px; overflow:hidden; min-height:600px; }
+.screen { display:none; flex-direction:column; min-height:600px; }
+.screen.active { display:flex; }
+.status-bar { background:#1D9E75; height:28px; display:flex; align-items:center; justify-content:space-between; padding:0 18px; }
+.status-bar span { font-size:11px; color:rgba(255,255,255,.9); font-weight:500; }
+.home-header { background:linear-gradient(160deg,#1D9E75,#0F6E56); padding:20px 18px 28px; color:white; }
+.greeting { font-size:12px; opacity:.85; margin-bottom:4px; }
+.balance { font-size:28px; font-weight:700; margin-bottom:14px; letter-spacing:-.5px; }
+.budget-wrap { background:rgba(255,255,255,.15); border-radius:8px; height:8px; overflow:hidden; margin-bottom:6px; }
+.budget-fill { height:100%; background:white; border-radius:8px; }
+.budget-info { display:flex; justify-content:space-between; font-size:11px; opacity:.85; }
+.summary-cards { background:white; border-radius:20px; margin:-14px 14px 0; padding:14px; border:1px solid #E8EDF2; box-shadow:0 2px 8px rgba(0,0,0,.05); display:flex; gap:10px; }
+.sum-card { flex:1; border-radius:12px; padding:10px; }
+.sum-label { font-size:10px; font-weight:600; }
+.sum-val { font-size:15px; font-weight:700; margin-top:3px; }
+.sum-desc { font-size:9px; margin-top:1px; }
+.section-label { font-size:11px; font-weight:600; color:#A0AEC0; text-transform:uppercase; letter-spacing:.5px; padding:14px 16px 6px; }
+.txn-list { flex:1; }
+.txn { display:flex; align-items:center; padding:10px 16px; gap:12px; border-bottom:1px solid #F7FAFC; cursor:pointer; transition:background .1s; }
+.txn:hover { background:#F7FAFC; }
+.txn-icon { width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.txn-info { flex:1; }
+.txn-name { font-size:13px; font-weight:500; color:#2D3748; }
+.txn-meta { font-size:11px; color:#A0AEC0; margin-top:1px; }
+.txn-amount { font-size:14px; font-weight:600; color:#E53E3E; }
+.nav-bar { display:flex; align-items:center; background:white; border-top:1px solid #EDF2F7; padding:10px 0 14px; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; }
+.nav-icon { font-size:20px; }
+.nav-label { font-size:9px; color:#CBD5E0; font-weight:500; }
+.nav-item.active .nav-label { color:#1D9E75; }
+.fab { width:52px; height:52px; border-radius:26px; background:#1D9E75; display:flex; align-items:center; justify-content:center; margin-top:-18px; border:3px solid white; box-shadow:0 4px 12px rgba(29,158,117,.4); cursor:pointer; transition:transform .15s; }
+.fab:active { transform:scale(.95); }
+.fab-icon { font-size:26px; color:white; line-height:1; }
+.add-header { background:linear-gradient(160deg,#1D9E75,#0F6E56); padding:14px 18px 18px; color:white; text-align:center; }
+.add-title { font-size:15px; font-weight:600; }
+.add-date { font-size:11px; opacity:.8; margin-top:2px; }
+.amount-area { padding:20px 18px 10px; text-align:center; }
+.amount-prefix { font-size:22px; color:#CBD5E0; font-weight:300; }
+.amount-num { font-size:44px; font-weight:700; color:#1A202C; letter-spacing:2px; transition:color .3s; }
+.ai-tag { display:inline-flex; align-items:center; gap:4px; background:#E1F5EE; color:#0F6E56; font-size:10px; font-weight:600; padding:3px 10px; border-radius:10px; margin-bottom:8px; }
+.cat-section { padding:0 14px 8px; }
+.cat-section-label { font-size:11px; color:#A0AEC0; font-weight:600; margin-bottom:8px; }
+.cat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.cat-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; }
+.cat-emoji { width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:20px; transition:all .15s; border:2px solid transparent; }
+.cat-item.sel .cat-emoji { border-color:#1D9E75; transform:scale(1.05); }
+.cat-name { font-size:9px; color:#718096; font-weight:500; }
+.note-row { display:flex; align-items:center; gap:8px; padding:8px 16px; border-top:1px solid #F0F0F0; border-bottom:1px solid #F0F0F0; }
+.note-icon { font-size:14px; }
+.note-inp { flex:1; font-size:12px; color:#A0AEC0; border:none; outline:none; background:transparent; font-family:inherit; }
+.numpad { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:#E8EDF2; flex:1; }
+.key { background:white; display:flex; align-items:center; justify-content:center; font-size:20px; color:#2D3748; cursor:pointer; transition:background .1s; min-height:52px; font-weight:500; }
+.key:active, .key.pressed { background:#F0F4F8; }
+.key-util { background:#F7F9FC; font-size:14px; color:#718096; }
+.key-save { background:#1D9E75; color:white; font-size:15px; font-weight:600; grid-column:span 2; }
+.key-save:active { background:#0F6E56; }
+.report-header { background:linear-gradient(160deg,#1D9E75,#0F6E56); padding:16px 18px 20px; color:white; }
+.report-month { font-size:13px; opacity:.85; display:flex; align-items:center; justify-content:space-between; }
+.report-total { font-size:30px; font-weight:700; margin:4px 0; }
+.report-vs { font-size:11px; opacity:.8; }
+.report-tabs { display:flex; gap:0; border-bottom:1px solid #EDF2F7; }
+.rtab { flex:1; text-align:center; padding:10px; font-size:12px; color:#A0AEC0; font-weight:500; border-bottom:2px solid transparent; cursor:pointer; }
+.rtab.active { color:#1D9E75; border-bottom-color:#1D9E75; }
+.chart-area { padding:16px; }
+.donut-row { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+.legend { flex:1; }
+.leg-row { display:flex; align-items:center; gap:6px; padding:4px 0; }
+.leg-dot { width:10px; height:10px; border-radius:5px; flex-shrink:0; }
+.leg-name { font-size:11px; color:#4A5568; flex:1; }
+.leg-amt { font-size:11px; font-weight:600; color:#2D3748; }
+.leg-pct { font-size:10px; color:#A0AEC0; margin-left:4px; }
+.bar-section { padding:0 16px 12px; }
+.bar-label-row { display:flex; justify-content:space-between; font-size:11px; color:#A0AEC0; margin-bottom:6px; }
+.bar-row { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+.bar-cat { font-size:11px; color:#4A5568; width:34px; flex-shrink:0; text-align:right; }
+.bar-track { flex:1; height:16px; background:#F0F0F0; border-radius:8px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:8px; }
+.bar-amt { font-size:11px; color:#2D3748; font-weight:500; width:40px; }
+.insight-box { margin:0 14px 14px; background:linear-gradient(135deg,#EAF3DE,#F0FBF6); border-radius:14px; padding:12px 14px; border-left:3px solid #5DCAA5; }
+.insight-title { font-size:11px; font-weight:700; color:#27500A; margin-bottom:5px; display:flex; align-items:center; gap:4px; }
+.insight-text { font-size:11px; color:#3B6D11; line-height:1.6; }
+.ai-indicator { display:inline-block; background:#1D9E75; color:white; font-size:8px; font-weight:700; padding:1px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+<p class="page-title">轻记账 LiteBook</p>
+<p class="page-sub">交互原型 — 核心界面展示</p>
+<span class="badge">V1.0 · Product Design Demo</span>
+
+<div class="screen-tabs">
+  <button class="tab active" onclick="show('home',this)">首页</button>
+  <button class="tab" onclick="show('add',this)">记账</button>
+  <button class="tab" onclick="show('report',this)">月报</button>
+</div>
+
+<div class="device">
+  <div class="device-inner">
+
+    <!-- HOME -->
+    <div class="screen active" id="s-home">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span>轻记账</span>
+        <span>100%</span>
+      </div>
+      <div class="home-header">
+        <div class="greeting">👋 本月总支出</div>
+        <div class="balance">¥ 3,260.50</div>
+        <div class="budget-wrap">
+          <div class="budget-fill" style="width:65%"></div>
+        </div>
+        <div class="budget-info"><span>已用 65% · ¥3,260</span><span>月预算 ¥5,000</span></div>
+      </div>
+      <div class="summary-cards">
+        <div class="sum-card" style="background:#EAF3DE;">
+          <div class="sum-label" style="color:#0F6E56;">本月最多</div>
+          <div class="sum-val" style="color:#085041;">餐饮</div>
+          <div class="sum-desc" style="color:#1D9E75;">¥980 · 30%</div>
+        </div>
+        <div class="sum-card" style="background:#E6F1FB;">
+          <div class="sum-label" style="color:#185FA5;">连续记账</div>
+          <div class="sum-val" style="color:#0C447C;">7 天 🔥</div>
+          <div class="sum-desc" style="color:#378ADD;">距目标还差3天</div>
+        </div>
+      </div>
+      <div class="section-label">最近记录</div>
+      <div class="txn-list">
+        <div class="txn">
+          <div class="txn-icon" style="background:#FFF3E0;">🍜</div>
+          <div class="txn-info">
+            <div class="txn-name">午餐 · 沙县小吃</div>
+            <div class="txn-meta">餐饮 · 今天 12:30</div>
+          </div>
+          <div class="txn-amount">-¥18</div>
+        </div>
+        <div class="txn">
+          <div class="txn-icon" style="background:#E3F2FD;">🚇</div>
+          <div class="txn-info">
+            <div class="txn-name">地铁出行</div>
+            <div class="txn-meta">交通 · 今天 08:15</div>
+          </div>
+          <div class="txn-amount">-¥6</div>
+        </div>
+        <div class="txn">
+          <div class="txn-icon" style="background:#F3E5F5;">🛍</div>
+          <div class="txn-info">
+            <div class="txn-name">京东购物</div>
+            <div class="txn-meta">购物 · 昨天 20:41</div>
+          </div>
+          <div class="txn-amount">-¥299</div>
+        </div>
+        <div class="txn">
+          <div class="txn-icon" style="background:#FFF8E1;">☕</div>
+          <div class="txn-info">
+            <div class="txn-name">瑞幸咖啡</div>
+            <div class="txn-meta">餐饮 · 昨天 09:20</div>
+          </div>
+          <div class="txn-amount">-¥19</div>
+        </div>
+        <div class="txn">
+          <div class="txn-icon" style="background:#E8F5E9;">💊</div>
+          <div class="txn-info">
+            <div class="txn-name">药店</div>
+            <div class="txn-meta">医疗 · 前天</div>
+          </div>
+          <div class="txn-amount">-¥36</div>
+        </div>
+      </div>
+      <div class="nav-bar">
+        <div class="nav-item active">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label" style="color:#1D9E75;">首页</span>
+        </div>
+        <div class="nav-item" onclick="show('report',null)">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">报告</span>
+        </div>
+        <div class="fab" onclick="show('add',null)">
+          <span class="fab-icon">+</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon">🔔</span>
+          <span class="nav-label">消息</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">我的</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD -->
+    <div class="screen" id="s-add">
+      <div class="status-bar">
+        <span style="cursor:pointer" onclick="show('home',null)">← 返回</span>
+        <span>快速记账</span>
+        <span></span>
+      </div>
+      <div class="add-header">
+        <div class="add-title">记一笔支出</div>
+        <div class="add-date" id="now-dt">2025年1月15日 周三</div>
+      </div>
+      <div class="amount-area">
+        <div>
+          <span class="amount-prefix">¥ </span>
+          <span class="amount-num" id="amt">0</span>
+        </div>
+        <div style="margin-top:8px;">
+          <span class="ai-tag">✦ AI 已识别分类：餐饮</span>
+        </div>
+      </div>
+      <div class="cat-section">
+        <div class="cat-section-label">选择分类</div>
+        <div class="cat-grid">
+          <div class="cat-item sel" onclick="pickCat(this)">
+            <div class="cat-emoji" style="background:#FFF3E0;">🍜</div>
+            <span class="cat-name">餐饮</span>
+          </div>
+          <div class="cat-item" onclick="pickCat(this)">
+            <div class="cat-emoji" style="background:#E3F2FD;">🚇</div>
+            <span class="cat-name">交通</span>
+          </div>
+          <div class="cat-item" onclick="pickCat(this)">
+            <div class="cat-emoji" style="background:#F3E5F5;">🛍</div>
+            <span class="cat-name">购物</span>
+          </div>
+          <div class="cat-item" onclick="pickCat(this)">
+            <div class="cat-emoji" style="background:#FCECEA;">🎮</div>
+            <span class="cat-name">娱乐</span>
+          </div>
+          <div class="cat-item" onclick="pickCat(this)">
+            <div class="cat-emoji" style="background:#E8F5E9;">🏠</div>
+            <span class="cat-name">居家</span>
+          </div>
+          <div class="cat-item" onclick="pickCat(this)">
+            <div class="cat-emoji" style="background:#E3F2FD;">💊</div>
+            <span class="cat-name">医疗</span>
+          </div>
+          <div class="cat-item" onclick="pickCat(this)">
+            <div class="cat-emoji" style="background:#FFF8E1;">☕</div>
+            <span class="cat-name">咖啡</span>
+          </div>
+          <div class="cat-item" onclick="pickCat(this)">
+            <div class="cat-emoji" style="background:#F5F5F5;">📦</div>
+            <span class="cat-name">其他</span>
+          </div>
+        </div>
+      </div>
+      <div class="note-row">
+        <span class="note-icon">📝</span>
+        <input class="note-inp" placeholder="添加备注（选填）" />
+      </div>
+      <div class="numpad">
+        <div class="key" onclick="kp('7')">7</div>
+        <div class="key" onclick="kp('8')">8</div>
+        <div class="key" onclick="kp('9')">9</div>
+        <div class="key" onclick="kp('4')">4</div>
+        <div class="key" onclick="kp('5')">5</div>
+        <div class="key" onclick="kp('6')">6</div>
+        <div class="key" onclick="kp('1')">1</div>
+        <div class="key" onclick="kp('2')">2</div>
+        <div class="key" onclick="kp('3')">3</div>
+        <div class="key key-util" onclick="kp('.')">.</div>
+        <div class="key" onclick="kp('0')">0</div>
+        <div class="key key-util" onclick="kp('del')">⌫</div>
+        <div class="key key-util" style="font-size:13px;" onclick="kp('+')">继续</div>
+        <div class="key key-save" onclick="save()">保 存</div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="screen" id="s-report">
+      <div class="status-bar">
+        <span style="cursor:pointer" onclick="show('home',null)">← 返回</span>
+        <span>月度报告</span>
+        <span></span>
+      </div>
+      <div class="report-header">
+        <div class="report-month">
+          <span>◀ 2025年1月</span>
+          <span>▶</span>
+        </div>
+        <div class="report-total">¥ 3,260.50</div>
+        <div class="report-vs">↑ 较上月增加 8.3% · ¥249</div>
+      </div>
+      <div class="report-tabs">
+        <div class="rtab active">分类占比</div>
+        <div class="rtab">趋势曲线</div>
+        <div class="rtab">AI洞察</div>
+      </div>
+      <div class="chart-area">
+        <div class="donut-row">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#F0F0F0" stroke-width="18"/>
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#FFC87C" stroke-width="18" stroke-dasharray="75 176" stroke-dashoffset="0" transform="rotate(-90 55 55)"/>
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#5DCAA5" stroke-width="18" stroke-dasharray="47 176" stroke-dashoffset="-75" transform="rotate(-90 55 55)"/>
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#85B7EB" stroke-width="18" stroke-dasharray="33 176" stroke-dashoffset="-122" transform="rotate(-90 55 55)"/>
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#F09595" stroke-width="18" stroke-dasharray="21 176" stroke-dashoffset="-155" transform="rotate(-90 55 55)"/>
+            <text x="55" y="52" text-anchor="middle" font-size="11" fill="#2D3748" font-weight="700">支出</text>
+            <text x="55" y="65" text-anchor="middle" font-size="9" fill="#A0AEC0">分析</text>
+          </svg>
+          <div class="legend">
+            <div class="leg-row"><div class="leg-dot" style="background:#FFC87C;"></div><span class="leg-name">餐饮</span><span class="leg-amt">¥980</span><span class="leg-pct">30%</span></div>
+            <div class="leg-row"><div class="leg-dot" style="background:#5DCAA5;"></div><span class="leg-name">购物</span><span class="leg-amt">¥620</span><span class="leg-pct">19%</span></div>
+            <div class="leg-row"><div class="leg-dot" style="background:#85B7EB;"></div><span class="leg-name">交通</span><span class="leg-amt">¥420</span><span class="leg-pct">13%</span></div>
+            <div class="leg-row"><div class="leg-dot" style="background:#F09595;"></div><span class="leg-name">娱乐</span><span class="leg-amt">¥328</span><span class="leg-pct">10%</span></div>
+            <div class="leg-row"><div class="leg-dot" style="background:#E8E8E8;"></div><span class="leg-name">其他</span><span class="leg-amt">¥913</span><span class="leg-pct">28%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bar-section">
+        <div class="bar-label-row"><span>分类</span><span>金额</span></div>
+        <div class="bar-row"><span class="bar-cat">餐饮</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:#FFC87C;"></div></div><span class="bar-amt">¥980</span></div>
+        <div class="bar-row"><span class="bar-cat">购物</span><div class="bar-track"><div class="bar-fill" style="width:63%;background:#5DCAA5;"></div></div><span class="bar-amt">¥620</span></div>
+        <div class="bar-row"><span class="bar-cat">交通</span><div class="bar-track"><div class="bar-fill" style="width:43%;background:#85B7EB;"></div></div><span class="bar-amt">¥420</span></div>
+        <div class="bar-row"><span class="bar-cat">娱乐</span><div class="bar-track"><div class="bar-fill" style="width:33%;background:#F09595;"></div></div><span class="bar-amt">¥328</span></div>
+        <div class="bar-row"><span class="bar-cat">其他</span><div class="bar-track"><div class="bar-fill" style="width:93%;background:#E0E0E0;"></div></div><span class="bar-amt">¥913</span></div>
+      </div>
+      <div class="insight-box">
+        <div class="insight-title"><span class="ai-indicator">AI</span> 消费洞察</div>
+        <div class="insight-text">
+          本月餐饮支出 ¥980，较上月增加 12%，外卖占餐饮总额 68%。若每周减少2次外卖，预计每月可节省约 <strong>¥200</strong>。购物支出较正常偏高，建议下月设置购物子预算。
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p style="font-size:11px; color:#A0AEC0; margin-top:16px; text-align:center;">点击标签切换页面 · 记账页可输入数字试用</p>
+<p style="font-size:11px; color:#A0AEC0; margin-top:4px; text-align:center;">© 2025 轻记账 LiteBook · Product Manager: [你的姓名]</p>
+
+<script>
+var amtStr = '';
+function show(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  if(btn){ document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); }
+  if(id==='add'){ amtStr=''; document.getElementById('amt').textContent='0'; document.getElementById('amt').style.color=''; }
+}
+function pickCat(el) {
+  document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function kp(v) {
+  if(v==='del'){ amtStr=amtStr.slice(0,-1); }
+  else if(v==='.'){ if(!amtStr.includes('.')) amtStr+=v; }
+  else if(v==='+'){ save(); return; }
+  else { if(amtStr.length<8) amtStr+=v; }
+  document.getElementById('amt').textContent = amtStr||'0';
+}
+function save() {
+  var el = document.getElementById('amt');
+  if(!amtStr||parseFloat(amtStr)===0) return;
+  el.style.color='#1D9E75';
+  setTimeout(()=>{ show('home',document.querySelector('.tab')); }, 700);
+}
+var d=new Date(); var days=['日','一','二','三','四','五','六'];
+var el=document.getElementById('now-dt');
+if(el) el.textContent = d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日 周'+days[d.getDay()];
+</script>
+</body>
+</html>
