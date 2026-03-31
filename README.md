@@ -11,22 +11,16 @@
 本项目为完整的产品设计方案，包含 PRD、流程泳道图、交互原型及商业规划，作为产品经理求职作品集展示使用。
 
 ---
+## 📁 项目文件结构与在线体验
 
-## 🗂️ 项目文件结构
+* 📄 **[`README.md`](./README.md)** <- 本文件（项目总览）
+* 📁 **docs/ (产品文档)**
+  * 📝 **[`LiteBook_PRD_v1.0.md`](./docs/LiteBook_PRD_v1.0.md)** <- 完整产品需求文档 (Markdown在线预览)
+  * 📎 **[`LiteBook_PRD_v1.0.docx`](./docs/LiteBook_PRD_v1.0.docx)** <- 完整产品需求文档 (Word版备份)
+* 📁 **design/ (交互与设计)**
+  * 📱 **[`prototype.html`](https://eestar52.github.io/-LiteBook/design/prototype.html)** <- 交互式产品原型 (**🚀强烈推荐：点击直接在浏览器操作体验**)
+  * 📊 **[`swimlane.html`](https://eestar52.github.io/-LiteBook/design/swimlane.html)** <- 核心业务流程泳道图 (**点击直接查看高清网页**)
 
-```
-## 📁 项目文件结构
-
-```text
-litebook-pm-portfolio/
-├── README.md                  <- 本文件（项目总览）
-├── docs/
-│   ├── LiteBook_PRD_v1.0.docx <- 完整产品需求文档 (Word版备份)
-│   └── LiteBook_PRD_v1.0.md    <- 完整产品需求文档 (Markdown精排版)
-├── design/
-│   ├── prototype.html         <- 交互式产品原型 (可在浏览器运行)
-│   └── swimlane.html          <- 核心业务流程泳道图 (纯代码绘制)
-```
 
 ---
 
